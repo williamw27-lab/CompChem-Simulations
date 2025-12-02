@@ -46,7 +46,7 @@ ax.set_title('Height (m) vs. Time (s)') # title the plot
 import matplotlib.animation as animation
 
 path_animated = ax.scatter(time_array[0],heights[0],s=5) # makes a scatter plot for the animation, with initial frame at time step 0
-ball_animated = ax.scatter(time_array[0],heights[0],s=10,c='r') # animates the ball as it travels 
+ball_animated = ax.scatter(time_array[0],heights[0],s=10,c='r') # animates the ball as it travels (i.e., only one point at a time)
 
 def update(frame):
     # for each frame, update the data stored
