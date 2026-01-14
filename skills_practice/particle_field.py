@@ -1,7 +1,6 @@
 ### Create a code to model the behavior of a charged particle in a uniform electric field, 2d
 
 import numpy as np
-from numpy.linalg import norm
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 
