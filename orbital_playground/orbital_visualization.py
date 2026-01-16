@@ -34,8 +34,8 @@ def psi_nlm(n, l, m, r, theta, phi):
 def plot_orbital_3d(n, l, m, Rmax=15*a0, N=60, iso=0.1):
     # 3D grid
     x = np.linspace(-Rmax, Rmax, N)
-    # y = np.linspace(-Rmax, Rmax, N)
-    y = np.array([-Rmax,0,Rmax])
+    y = np.linspace(-Rmax, Rmax, N)
+    # y = np.array([-Rmax,0,Rmax])
     z = np.linspace(-Rmax, Rmax, N)
     xx, yy, zz = np.meshgrid(x, y, z)
 
@@ -56,7 +56,6 @@ def plot_orbital_3d(n, l, m, Rmax=15*a0, N=60, iso=0.1):
         opacity=0.5,
         surface_count=5,
         colorscale="Viridis",
-        cmin = 10 ** 25
     ))
 
     fig.update_layout(
@@ -67,4 +66,4 @@ def plot_orbital_3d(n, l, m, Rmax=15*a0, N=60, iso=0.1):
     fig.show()
 
 # Example: 2p orbital
-plot_orbital_3d(3,0,0, N=100, Rmax = 20 * a0, iso=0.003)
+plot_orbital_3d(3,2,0, N=100, Rmax = 20 * a0, iso=0.1)
