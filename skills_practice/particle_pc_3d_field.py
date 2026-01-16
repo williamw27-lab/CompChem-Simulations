@@ -18,17 +18,15 @@ y_i = 2.0 # position in a grid, y axis (m)
 z_i = 2.0 # position in a grid, z axis (m)
 v_i = np.array([1.0,1.0,1.0]) # particle initial velocity as a vector [vx,vy,vz] (m/s)
 
-point_charge = ((1.,1.,1.),1.0*e) # describe the point charge's position and charge
+point_charge = ((0.,0.,0.),1.0*e) # describe the point charge's position and charge
 
 B = np.array([0.,0.,0.]) # strength of magnetic field (?)
-
-sf = 0.001 # scale velocity vector
 
 ## defining the evolution function
 def evolution(t, state, r_min, B_field, charge, mass, pc, k):
     '''
     Returns the derivatives of position and velocity for solve_ivp
-    
+
     :param t: time
     :param state: array holding the position and velocity of the particle
     :param B_field: array describing the vector of the magnetic field
@@ -53,11 +51,9 @@ def evolution(t, state, r_min, B_field, charge, mass, pc, k):
 
     return [vx, vy, vz, a[0], a[1], a[2]]
 
-def mesh_E_field()
-
 ## preparing to use solve_ivp
 span = (0, 1) # time interval to evaluate
-eval = np.linspace(0,1,101) # points to return 
+eval = np.linspace(0,1,101) # points to return
 system = (0.001, B, q, m, point_charge, k)
 initial_state = [x_i, y_i, z_i, v_i[0], v_i[1], v_i[2]]
 
@@ -78,7 +74,7 @@ xs, ys, zs, *vs = solution.y
 fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
 
-proton = ax.scatter(point_charge[0][0], point_charge[0][1], point_charge[0][2])
+proton = ax.scatter([0.],[0.],[0.])
 electron = ax.scatter(xs[0],ys[0],zs[0])
 velocity = ax.quiver(xs[0],ys[0],zs[0],xs[1]-xs[0],ys[1]-ys[0],zs[1]-zs[0], color='red')
 
@@ -93,11 +89,8 @@ def update(frame):
         u = xs[frame + 1]
         v = ys[frame + 1]
         w = zs[frame + 1]
-        u = vs[frame][0]/10000
-        v = vs[frame][1]/10000
-        w = vs[frame][2]/10000
         # print(u, v, w)
-        velocity.set_segments([[[x, y, z],[u, v, w]]])
+        velocity.set_segments([[[x, y, z], [u, v, w]]])
     except IndexError:
         velocity.set_segments([[[x, y, z], [0, 0, 0]]])
     return (electron, velocity,)
