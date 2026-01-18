@@ -66,4 +66,5 @@ def plot_orbital_3d(n, l, m, Rmax=15*a0, N=60, iso=0.1):
     fig.show()
 
 # Example: 2p orbital
+# Example: 3d orbital
 plot_orbital_3d(3,2,0, N=100, Rmax = 20 * a0, iso=0.1)
