@@ -18,6 +18,18 @@ class Orbital:
         self.l = l
         self.m = m
         self.E = -1 / (2 * n**2)
+
+    def orb_to_string(self):
+        if self.l == 0:
+            sub = 's'
+        elif self.l == 1:
+            sub = 'p'
+        elif self.l == 2:
+            sub = 'd'
+        elif self.l == 3:
+            sub = 'f'
+
+        return f'{self.n}{sub}{self.m}'
     
     # Radial hydrogen wavefunction
     def R_nlm(self, r):
@@ -245,7 +257,14 @@ dipole_matrix = dipole_matrix_for_polarization(xyz=dipoles_xyz,polarization=pol)
 
 # * H(t)
 
-def compute_hamiltonian(t, H0=FieldFreeHam, D=dipole_matrix, E0=0.01, omega=0.375, T=15*2*np.pi/0.375, t0=300.0, phi=0.0):
+E0 = 0.01
+omega = 0.375
+N_cycles = 15
+T = N_cycles * 2 * np.pi / omega
+t0 = 300.0
+phi = 0.0
+
+def compute_hamiltonian(t, H0=FieldFreeHam, D=dipole_matrix, E0=E0, omega=omega, T=T, t0=t0, phi=phi):
     if np.abs(t-t0) <= T/2:
         envelope = np.sin(np.pi*(t-(t0-T/2))/T)**2
     else:
@@ -322,14 +341,13 @@ def FindCoeffs(c0, t_array, dt, H_of_t):
 
 FinalCoeff = FindCoeffs(initial_coeff,ts,dt,compute_hamiltonian)
 
-# for i in range(len(FinalCoeff)): # Checking normalization of coefficients
-#     print(norm(FinalCoeff[i]))
+# * coefficient checks
+norms = np.array([norm(FinalCoeff[i]) for i in range(len(FinalCoeff))]) # checking normalization
 
-# pops = np.abs(FinalCoeff)**2 # Checking 'populations'
-# print(pops)
+pops = np.abs(FinalCoeff)**2 # Checking populations
 
-# E_t = np.array([np.vdot(FinalCoeff[c_in], compute_hamiltonian(c_in*dt) @ FinalCoeff[c_in]).real for c_in in range(len(FinalCoeff))]) # checking energy expectation
-# print(E_t)
+Eexp = np.array([np.vdot(FinalCoeff[c_in], compute_hamiltonian(c_in*dt) @ FinalCoeff[c_in]).real for c_in in range(len(FinalCoeff))]) # checking energy expectation
+
 
 def psi_eval(basis, coeffs, step, Rmax=15*a0, N=60):
     # 3D grid
@@ -352,3 +370,77 @@ def psi_eval(basis, coeffs, step, Rmax=15*a0, N=60):
     final_psi = sum(vals)
 
     pass
+
+## ! Saving results (ChatGPT)
+
+from pathlib import Path
+from datetime import datetime
+import shutil
+import json
+
+# * Create a run directory
+def create_run_dir(base_dir="runs", make_latest=True):
+    base = "excited_hydrogen_project" / Path(base_dir)
+    base.mkdir(exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    run_dir = base / timestamp
+    run_dir.mkdir()
+
+    if make_latest:
+        latest = base / "latest"
+        if latest.exists():
+            shutil.rmtree(latest)
+        latest.mkdir()
+
+    return run_dir, (base / "latest" if make_latest else None)
+
+run_dir, latest_dir = create_run_dir()
+
+# * Save results (arrays)
+
+def save_results_npz(run_dir, **arrays):
+    np.savez(run_dir / "results.npz", **arrays)
+
+save_results_npz(
+    run_dir,
+    t=ts,
+    C=FinalCoeff,
+    populations=pops,
+    energy=Eexp,
+    norm=norms
+)
+
+# * json summary
+
+summary = {
+    "pulse": {
+        "omega": omega,
+        "T": T,
+        "t0": t0,
+        "E0": E0
+    },
+    "time_step": dt,
+    "basis": [orb.orb_to_string() for orb in Basis],
+    "checks": {
+        "norm_max_dev": float(np.max(np.abs(norms - 1))),
+        "energy_max_dev": float(np.max(Eexp) - np.min(Eexp)),
+        "final_populations": pops[-1].tolist()
+    }
+}
+
+def save_summary_json(run_dir, summary_dict):
+    with open(run_dir / "summary.json", "w") as f:
+        json.dump(summary_dict, f, indent=2)
+
+save_summary_json(run_dir,summary)
+
+# * update latest
+
+def update_latest(run_dir, latest_dir):
+    for fname in ["results.npz", "summary.json"]:
+        src = run_dir / fname
+        dst = latest_dir / fname
+        shutil.copy2(src, dst)
+
+update_latest(run_dir, latest_dir)
