@@ -3,7 +3,7 @@
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-from scipy.special import sph_harm, genlaguerre
+from scipy.special import sph_harm_y, genlaguerre
 from scipy.constants import physical_constants
 from scipy.linalg import solve
 from scipy import integrate
@@ -31,6 +31,9 @@ class Orbital:
 
         return f'{self.n}{sub}{self.m}'
     
+    def key(self):
+        return (self.n,self.l,self.m)
+    
     # Radial hydrogen wavefunction
     def R_nlm(self, r):
         rho = 2 * r / (self.n)
@@ -47,13 +50,70 @@ class Orbital:
     # Angular part (Y_l^m)
     # represents the angular component of the wavefunction in terms of theta and phi
     def Y_lm(self, theta, phi):
-        return sph_harm(self.m, self.l, phi, theta)
+        return sph_harm_y(self.m, self.l, phi, theta)
 
 
     # Full separated wavefunction ψ = R(r) Y(θ,φ)
     def psi_nlm(self, r, theta, phi):
         return self.R_nlm(r) * self.Y_lm(theta,phi)
+
+def make_hydrogen_orbitals(nmax):
+
+    orbs_list = []
+
+    for n in range(1,nmax+1):
+        for l in range(n):
+            if 0 <= l <= 3:
+                for m in range(-l,l+1):
+                    orbs_list.append(Orbital(n,l,m))
+            
+            else:
+                continue
+
+    return orbs_list
+
+class Basis:
+    def __init__(self, orbitals):
+        self.orbitals = list(orbitals)
+        self.N = len(self.orbitals)
+
+        self.key_to_index = {
+            orb.key: i for i, orb in enumerate(self.orbitals)
+        }
+
+    # accessing
+    def numbers_to_index(self, n = None, l = None, m = None, key = None):
+        if key is not None:
+            return self.key_to_index[key]
+        return self.key_to_index[(n,l,m)]
     
+    def index_to_numbers(self,i):
+        return self.orbitals[i]
+    
+    # selecting orbitals
+    def select(self, predicate):
+        """
+        Return indices i for which predicate(orbital) is True
+        """
+        return [i for i, orb in enumerate(self.orbitals) if predicate(orb)]
+
+    def select_n(self, n):
+        return self.select(lambda o: o.n == n)
+
+    def select_l(self, l):
+        return self.select(lambda o: o.l == l)
+
+    def select_nl(self, n, l):
+        return self.select(lambda o: o.n == n and o.l == l)
+
+    # constructing operators
+    def build_H0(self):
+        energies = [orb.E for orb in self.orbitals]
+        return np.diag(energies)
+
+class Operators:
+    pass
+
 # checking the normalization of the orbital (ChatGPT)
 # norm_check = Orbital(n=1,l=0,m=0)
 
@@ -115,12 +175,13 @@ class Orbital:
 # print(radial_overlap(s1,s2))
 # print(angular_overlap(p2a,p2b))
 
-## ! creating the basis (1s, 2px, 2pz, 2py)
-Basis = [Orbital(1,0,0),Orbital(2,1,-1),Orbital(2,1,0),Orbital(2,1,1)]
+## ! creating the basis 
+
+basis = Basis(make_hydrogen_orbitals(nmax=2))
 
 ## ! creating the hamiltonian
-basis_energies = [orb.E for orb in Basis]
-FieldFreeHam = np.diag(basis_energies)
+
+FieldFreeHam = basis.build_H0()
 
 ## ! Hamiltonian time evolution (ChatGPT)
 
@@ -252,7 +313,7 @@ def dipole_matrix_for_polarization(xyz, polarization, normalize=True):
 
 # ? defining the polarization and computing the dipole polarization matrix
 pol = np.array([0.,0.,1.0],dtype=np.complex128)
-dipoles_xyz = (compute_dipole_matrices_xyz(basis=Basis))
+dipoles_xyz = (compute_dipole_matrices_xyz(basis=basis.orbitals))
 dipole_matrix = dipole_matrix_for_polarization(xyz=dipoles_xyz,polarization=pol)
 
 # * H(t)
@@ -278,7 +339,7 @@ def compute_hamiltonian(t, H0=FieldFreeHam, D=dipole_matrix, E0=E0, omega=omega,
 
 ## ! coefficient vector and time evolution
 # initial state
-initial_coeff = np.array([1.0,0.,0.,0.],dtype=np.complex128) # example, where only the 1s orbital is pictured
+initial_coeff = np.array([1.0,0.,0.,0.,0.],dtype=np.complex128) # example, where only the 1s orbital is pictured
 # initial_coeff = np.array([1/np.sqrt(2),0.,1/np.sqrt(2),0.],dtype=np.complex128)
 # x0 = np.real(initial_coeff)
 # y0 = np.imag(initial_coeff)
@@ -348,7 +409,6 @@ pops = np.abs(FinalCoeff)**2 # Checking populations
 
 Eexp = np.array([np.vdot(FinalCoeff[c_in], compute_hamiltonian(c_in*dt) @ FinalCoeff[c_in]).real for c_in in range(len(FinalCoeff))]) # checking energy expectation
 
-
 def psi_eval(basis, coeffs, step, Rmax=15*a0, N=60):
     # 3D grid
     x = np.linspace(-Rmax, Rmax, N)
@@ -371,76 +431,80 @@ def psi_eval(basis, coeffs, step, Rmax=15*a0, N=60):
 
     pass
 
+## ! relaxation implementation
+
+
+
 ## ! Saving results (ChatGPT)
 
-from pathlib import Path
-from datetime import datetime
-import shutil
-import json
+# from pathlib import Path
+# from datetime import datetime
+# import shutil
+# import json
 
-# * Create a run directory
-def create_run_dir(base_dir="runs", make_latest=True):
-    base = "excited_hydrogen_project" / Path(base_dir)
-    base.mkdir(exist_ok=True)
+# # * Create a run directory
+# def create_run_dir(base_dir="runs", make_latest=True):
+#     base = "excited_hydrogen_project" / Path(base_dir)
+#     base.mkdir(exist_ok=True)
 
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-    run_dir = base / timestamp
-    run_dir.mkdir()
+#     timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+#     run_dir = base / timestamp
+#     run_dir.mkdir()
 
-    if make_latest:
-        latest = base / "latest"
-        if latest.exists():
-            shutil.rmtree(latest)
-        latest.mkdir()
+#     if make_latest:
+#         latest = base / "latest"
+#         if latest.exists():
+#             shutil.rmtree(latest)
+#         latest.mkdir()
 
-    return run_dir, (base / "latest" if make_latest else None)
+#     return run_dir, (base / "latest" if make_latest else None)
 
-run_dir, latest_dir = create_run_dir()
+# run_dir, latest_dir = create_run_dir()
 
-# * Save results (arrays)
+# # * Save results (arrays)
 
-def save_results_npz(run_dir, **arrays):
-    np.savez(run_dir / "results.npz", **arrays)
+# def save_results_npz(run_dir, **arrays):
+#     np.savez(run_dir / "results.npz", **arrays)
 
-save_results_npz(
-    run_dir,
-    t=ts,
-    C=FinalCoeff,
-    populations=pops,
-    energy=Eexp,
-    norm=norms
-)
+# save_results_npz(
+#     run_dir,
+#     t=ts,
+#     C=FinalCoeff,
+#     populations=pops,
+#     energy=Eexp,
+#     norm=norms
+# )
 
-# * json summary
+# # * json summary
 
-summary = {
-    "pulse": {
-        "omega": omega,
-        "T": T,
-        "t0": t0,
-        "E0": E0
-    },
-    "time_step": dt,
-    "basis": [orb.orb_to_string() for orb in Basis],
-    "checks": {
-        "norm_max_dev": float(np.max(np.abs(norms - 1))),
-        "energy_max_dev": float(np.max(Eexp) - np.min(Eexp)),
-        "final_populations": pops[-1].tolist()
-    }
-}
+# summary = {
+#     "pulse": {
+#         "omega": omega,
+#         "T": T,
+#         "t0": t0,
+#         "E0": E0
+#     },
+#     "time_step": dt,
+#     "basis": [orb.orb_to_string() for orb in basis.orbitals],
+#     "checks": {
+#         "norm_max_dev": float(np.max(np.abs(norms - 1))),
+#         "energy_max_dev": float(np.max(Eexp) - np.min(Eexp)),
+#         "final_populations": pops[-1].tolist()
+#     }
+# }
 
-def save_summary_json(run_dir, summary_dict):
-    with open(run_dir / "summary.json", "w") as f:
-        json.dump(summary_dict, f, indent=2)
+# def save_summary_json(run_dir, summary_dict):
+#     with open(run_dir / "summary.json", "w") as f:
+#         json.dump(summary_dict, f, indent=2)
 
-save_summary_json(run_dir,summary)
+# save_summary_json(run_dir,summary)
 
-# * update latest
+# # * update latest
 
-def update_latest(run_dir, latest_dir):
-    for fname in ["results.npz", "summary.json"]:
-        src = run_dir / fname
-        dst = latest_dir / fname
-        shutil.copy2(src, dst)
+# def update_latest(run_dir, latest_dir):
+#     for fname in ["results.npz", "summary.json"]:
+#         src = run_dir / fname
+#         dst = latest_dir / fname
+#         shutil.copy2(src, dst)
 
-update_latest(run_dir, latest_dir)
+# update_latest(run_dir, latest_dir)
