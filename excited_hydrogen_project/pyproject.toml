@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hydrogen-sim"
+version = "0.1.0"
+description = "Hydrogen atom simulation with basis-set and Lindblad dynamics"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=2.3.5",
+    "scipy>=1.17",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
