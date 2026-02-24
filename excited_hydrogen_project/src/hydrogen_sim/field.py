@@ -2,7 +2,7 @@
 
 import numpy as np
 
-def make_E_of_t(t: np.ndarray, pulse_params):
+def make_E_of_t(t: np.ndarray, pulse_params) -> np.ndarray:
     ts = np.copy(t)
     envelopes = np.zeros(shape=ts.shape)
 
@@ -16,5 +16,5 @@ def make_E_of_t(t: np.ndarray, pulse_params):
 
     return elec_field
 
-# def compute_hamiltonian(t, ops, pulse_params):
-#     return ops.H0 - _sin2_field(t, pulse_params) * ops.D
+def H_of_t(t, ops, E_of_t):
+    return ops.H0 - E_of_t(t) * ops.D

@@ -1,0 +1,1 @@
+# Make sure package info is also updated

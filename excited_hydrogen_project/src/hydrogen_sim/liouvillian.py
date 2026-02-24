@@ -223,3 +223,13 @@ def enforce_rho_physical(rho: Array) -> Array:
     tr = np.trace(rho)
     rho = rho / complex(tr)  # cast avoids numpy scalar typing issues
     return rho
+
+# -------------------------
+# Checks (herm error, positivity)
+# -------------------------
+def hermiticity_error(rho: np.ndarray) -> float:
+    return float(np.linalg.norm(rho - rho.conj().T))
+
+def min_eig_hermitized(rho: np.ndarray) -> float:
+    rhoH = 0.5 * (rho + rho.conj().T)
+    return float(np.min(np.linalg.eigvalsh(rhoH)).real)

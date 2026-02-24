@@ -43,7 +43,7 @@ class Orbital:
     # Angular part (Y_l^m)
     # represents the angular component of the wavefunction in terms of theta and phi
     def Y_lm(self, theta, phi):
-        return sph_harm_y(self.m, self.l, phi, theta)
+        return sph_harm_y(self.l, self.m, theta, phi)
 
 
     # Full separated wavefunction ψ = R(r) Y(θ,φ)
