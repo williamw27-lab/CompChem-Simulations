@@ -9,10 +9,8 @@ from hydrogen_sim.field import make_E_of_t
 from hydrogen_sim.liouvillian import compile_E1_spontaneous, build_L0_LE
 from hydrogen_sim.steppers import make_E_callable, run_rho
 
-# Optional density snapshots
 from hydrogen_sim.projection import SliceGrid, GridProjector
 
-# These depend on your implementations
 from hydrogen_sim.config import *  
 from hydrogen_sim.basis import make_hydrogen_basis
 from hydrogen_sim.operators import Operators  
@@ -57,6 +55,7 @@ def main():
     t = np.arange(cfg.time.t_start, cfg.time.t_end + dt, dt)
 
     store_every = getattr(cfg.time, "store_every", 10)
+    rho_store_every = getattr(cfg.time, 'rho_store_every,', 20)
 
     # -------------------------
     # 3) Field E(t)
@@ -87,7 +86,7 @@ def main():
     # 6) Initial rho
     # -------------------------
     rho0 = np.zeros((N, N), dtype=np.complex128)
-    rho0[idx_1s, idx_1s] = 1.0
+    rho0[idx_1s, idx_1s] = 1.0 # ! Initial state: pure 1s
 
     # -------------------------
     # 8) Run rho evolution
@@ -103,6 +102,7 @@ def main():
         decomp=decomp,
         H0=H0,
         store_every=store_every,
+        rho_store_every=rho_store_every,
         cleanup=True,
     )
 
@@ -145,6 +145,10 @@ def main():
         "pops": traj.pops,
         "trace": traj.trace,
         "purity": traj.purity,
+        "herm_error": traj.herm_error,
+        "t_snaps": traj.t_snaps,
+        "rho_snaps": traj.rho_snaps,
+        "positivity": traj.min_eig,
     }
 
     summary = {
@@ -175,7 +179,9 @@ def main():
             "min pops": float(np.min(arrays["pops"])),
             "purity min": float(np.min(arrays["purity"])),
             "purity max": float(np.max(arrays["purity"])),
-            "final pops": list(float(i) for i in arrays["pops"][-1,:].tolist())
+            "final pops": list(float(i) for i in arrays["pops"][-1,:].tolist()),
+            "herm error max": float(np.max(arrays["herm_error"])),
+            "positivity min": float(np.min(arrays["positivity"]))
             },
         "script": "run_rho"
         }
@@ -190,7 +196,11 @@ def main():
         energy = arrays["energy_H0"],
         pops = arrays["pops"],
         trace = arrays["trace"],
-        purity = arrays["purity"]
+        purity = arrays["purity"],
+        herm_error = arrays["herm_error"],
+        t_snaps = arrays["t_snaps"],
+        rho_snaps = arrays["rho_snaps"],
+        positivity = arrays["positivity"]
     )
 
 
