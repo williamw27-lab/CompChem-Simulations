@@ -48,8 +48,8 @@ def main():
     # Combine polarization -> D
     D = ops.D
 
-    # ------------------------- TODO: fix organization and labels
-    # 7) Time grid
+    # ------------------------- 
+    # 3) Time grid
     # -------------------------
     dt = cfg.time.dt
     t = np.arange(cfg.time.t_start, cfg.time.t_end + dt, dt)
@@ -58,12 +58,13 @@ def main():
     rho_store_every = getattr(cfg.time, 'rho_store_every,', 20)
 
     # -------------------------
-    # 3) Field E(t)
+    # 4) Field E(t)
     # -------------------------
     E_array = make_E_of_t(t, cfg.pulse)
+    E_of_t = make_E_callable(t,E_array)
 
     # -------------------------
-    # 4) Collapse operators
+    # 5) Collapse operators
     # -------------------------
 
     if cfg.relaxation.enabled:
@@ -78,12 +79,12 @@ def main():
 
 
     # -------------------------
-    # 5) Liouvillian decomposition
+    # 6) Liouvillian decomposition
     # -------------------------
     decomp = build_L0_LE(H0=H0, D=D, L_list=L_list)
 
     # -------------------------
-    # 6) Initial rho
+    # 7) Initial rho
     # -------------------------
     rho0 = np.zeros((N, N), dtype=np.complex128)
     rho0[idx_1s, idx_1s] = 1.0 # ! Initial state: pure 1s
@@ -91,8 +92,6 @@ def main():
     # -------------------------
     # 8) Run rho evolution
     # -------------------------
-
-    E_of_t = make_E_callable(t,E_array)
 
     traj = run_rho(
         rho0=rho0,
@@ -107,36 +106,7 @@ def main():
     )
 
     # -------------------------
-    # 9) Optional: density snapshots on a grid
-    # -------------------------
-    # density_snaps = None
-    # if getattr(cfg, "density", None) is not None and cfg.density.enabled:
-    #     grid = SliceGrid(
-    #         plane=cfg.density.plane,
-    #         extent=cfg.density.extent,
-    #         n=cfg.density.n,
-    #         fixed_value=getattr(cfg.density, "fixed_value", 0.0),
-    #     )
-    #     proj = GridProjector(basis, grid)
-
-    #     # Choose snapshot indices in stored trajectory times
-    #     # e.g. 10 snapshots evenly spaced
-    #     snap_count = getattr(cfg.density, "snap_count", 10)
-    #     idxs = np.linspace(0, len(traj.t) - 1, snap_count, dtype=int)
-
-    #     # NOTE: run_rho currently only returns rho_final, not rho(t).
-    #     # If you want rho snapshots, you have two options:
-    #     #   A) modify run_rho to optionally store rho every k steps
-    #     #   B) re-run stepping in a second loop only at desired times
-    #     #
-    #     # For now, we demonstrate storing only the final density:
-    #     density_snaps = {
-    #         "t": np.array([traj.t[-1]]),
-    #         "P": np.array([proj.density_from_rho(traj.rho_final)]),
-    #     }
-
-    # -------------------------
-    # 10) Save outputs
+    # 9) Save outputs
     # -------------------------
 
     arrays = {
@@ -173,7 +143,7 @@ def main():
             "enabled": cfg.relaxation.enabled,
             "gamma": cfg.relaxation.gamma_scale
             },
-        "checks": {
+        "checks": { # TODO: add store every values
             "max |Tr-1|": float(np.max(np.abs(arrays["trace"]-1))),
             "max |sum(pops)-1|": float(np.max(np.abs(np.sum(arrays["pops"],axis=1)-1.0))),
             "min pops": float(np.min(arrays["pops"])),
