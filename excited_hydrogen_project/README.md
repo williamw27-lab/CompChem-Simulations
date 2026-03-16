@@ -1,6 +1,89 @@
-# Computational Chemistry Project: Hydrogen atom excitation and relaxation
-==================================================================
+# Project: Hydrogen atom excitation and relaxation
+=================================================
 
-This project contains a package and scripts to model the 
+This python project contains a package and scripts to model the 
 excitation and relaxation of a Hydrogen atom. Created by 
 motivated students at Lakeside School in Seattle!
+
+=================================================
+
+## Project information
+
+Hydrogen atom simulation in atomic units using a basis-set approach with:
+
+[x] hydrogenic orbitals \((n,\ell,m)\)
+[x] field-free and driven dynamics
+[x] density-matrix evolution with Lindblad relaxation
+[x] dipole coupling in the electric dipole approximation
+[x] 2D visualization 
+[] 3D visualization and animation
+
+## Project structure
+
+```
+excited_hydrogen_project/
+|
+├── pyproject.toml
+├── README.md
+├── scripts/
+│   ├── run_rho.py
+│   └── run_tester.py
+├── src/
+│   └── hydrogen_sim/
+│       ├── __init__.py
+│       ├── basis.py
+│       ├── config.py
+│       ├── field.py
+│       ├── integrals.py
+│       ├── io.py
+│       ├── liouvillian.py
+│       ├── observables.py
+│       ├── operators.py
+│       ├── projection.py
+│       ├── steppers.py
+│       └── orbitals.py
+└── runs/
+```
+
+## Package Installation
+
+0. Clone the repository, in your terminal:
+    'git clone [text](https://github.com/williamw27-lab/CompChem-Simulations.git)'
+1. Activate a virtual environment in the repository directory
+2. Install pip
+3. Enter the /excited_hydrogen_project/ directory and run:
+    'pip install -e .' Install in *editable* mode
+
+## Running
+
+Run the main density-matrix simulation with:
+    'python scripts/run_rho.py'
+
+After pulling updates
+
+If dependencies, package structure, or scripts changed, run:
+
+pip install -e .
+Outputs
+
+Simulation outputs are written to runs/ and typically include:
+
+compressed array data in .npz
+
+run metadata and diagnostics in .json
+
+a latest/ directory with the most recent run
+
+Typical saved quantities include:
+
+stored times
+
+populations
+
+energy expectation values
+
+trace
+
+purity
+
+rho snapshots
