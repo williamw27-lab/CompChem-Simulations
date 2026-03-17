@@ -20,7 +20,7 @@ Hydrogen atom simulation in atomic units using a basis-set approach with:
 
 ## Project structure
 
-```
+```text
 excited_hydrogen_project/
 |
 ├── pyproject.toml
