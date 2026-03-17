@@ -11,12 +11,12 @@ motivated students at Lakeside School in Seattle!
 
 Hydrogen atom simulation in atomic units using a basis-set approach with:
 
-- [x] hydrogenic orbitals \((n,\ell,m)\)
+- [x] hydrogenic orbitals (n,l,m)
 - [x] field-free and driven dynamics
 - [x] density-matrix evolution with Lindblad relaxation
 - [x] dipole coupling in the electric dipole approximation
 - [x] 2D visualization 
-- [] 3D visualization and animation
+- [ ] 3D visualization and animation
 
 ## Project structure
 
@@ -26,7 +26,7 @@ excited_hydrogen_project/
 ├── pyproject.toml
 ├── README.md
 ├── scripts/
-│   ├── old_project.py ==No longer used==
+│   ├── old_project.py (No longer used)
 │   ├── run_rho.py
 │   ├── viz_2d.py
 │   ├── viz_3d.py
@@ -52,7 +52,7 @@ excited_hydrogen_project/
 ## Package Installation
 
 0. Clone the repository, in your terminal:
-    `git clone [https://github.com/williamw27-lab/CompChem-Simulations.git](https://github.com/williamw27-lab/CompChem-Simulations.git)`
+    `git clone https://github.com/williamw27-lab/CompChem-Simulations.git`
 1. Activate a virtual environment in the repository directory
 2. Install pip
 3. Enter the excited_hydrogen_project/ directory and run:
@@ -85,3 +85,17 @@ Typical saved quantities (in .npz) include:
 
 ## Dependencies
 
+numpy >= 2.3.5
+scipy >= 1.17.0
+plotly >= 6.5.0 
+    plotly dependency not in package yet
+
+## Visualization
+
+Run the corresponding script:
+    `python excited_hydrogen_project/scripts/viz_2d.py` 
+        matplotlib snapshots
+    `python excited_hydrogen_project/scripts/viz_3d.py` 
+        plotly isosurface snapshots (WIP)
+    `python excited_hydrogen_project/scripts/animated_3d.py` 
+        plotly isosurface animation (WIP)
