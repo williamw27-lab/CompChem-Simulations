@@ -94,10 +94,9 @@ Typical saved quantities (in .npz) include:
 
 ## Dependencies
 
-numpy >= 2.3.5
-scipy >= 1.17.0
-plotly >= 6.5.0 
-    plotly dependency not in package yet
+- numpy >= 2.3.5
+- scipy >= 1.17.0
+- plotly >= 6.5.0 *plotly dependency not in package yet*
 
 ## Visualization
 
