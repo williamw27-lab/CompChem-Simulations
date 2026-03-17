@@ -52,21 +52,30 @@ excited_hydrogen_project/
 ## Package Installation
 
 0. Clone the repository, in your terminal:
-    `git clone https://github.com/williamw27-lab/CompChem-Simulations.git`
+```bash
+    git clone https://github.com/williamw27-lab/CompChem-Simulations.git
+```
 1. Activate a virtual environment in the repository directory
 2. Install pip
 3. Enter the excited_hydrogen_project/ directory and run:
-    `pip install -e .` Install in *editable* mode
+```bash
+    pip install -e .
+```
+Install the package in *editable* mode
 
 ## Package updates
 
 If dependencies, package structure, or scripts changed, run:
-    `pip install -e .`
+```bash
+pip install -e .
+```
 
 ## Running
 
 Run the main density-matrix simulation with:
-    `python excited_hydrogen_project/scripts/run_rho.py`
+```bash
+python excited_hydrogen_project/scripts/run_rho.py
+```
 
 ## Outputs
 
@@ -93,9 +102,12 @@ plotly >= 6.5.0
 ## Visualization
 
 Run the corresponding script:
-    `python excited_hydrogen_project/scripts/viz_2d.py` 
-        matplotlib snapshots
-    `python excited_hydrogen_project/scripts/viz_3d.py` 
-        plotly isosurface snapshots (WIP)
-    `python excited_hydrogen_project/scripts/animated_3d.py` 
-        plotly isosurface animation (WIP)
+```bash
+python excited_hydrogen_project/scripts/viz_2d.py # matplotlib snapshots
+``` 
+```bash
+python excited_hydrogen_project/scripts/viz_3d.py -h # plotly isosurface snapshots
+```
+```bash
+python excited_hydrogen_project/scripts/animated_3d.py # plotly isosurface animation (WIP)
+```
