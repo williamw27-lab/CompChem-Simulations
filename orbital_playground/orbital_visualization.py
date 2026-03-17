@@ -2,7 +2,7 @@ import numpy as np
 import math
 
 import matplotlib.pyplot as plt
-from scipy.special import sph_harm, genlaguerre
+from scipy.special import sph_harm, genlaguerre # scipy now uses scipy.special.sph_harm_y(l, m, theta, phi)
 from scipy.constants import physical_constants
 import plotly.graph_objects as go
 
