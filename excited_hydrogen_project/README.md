@@ -53,13 +53,13 @@ excited_hydrogen_project/
 
 0. Clone the repository, in your terminal:
 ```bash
-    git clone https://github.com/williamw27-lab/CompChem-Simulations.git
+git clone https://github.com/williamw27-lab/CompChem-Simulations.git
 ```
 1. Activate a virtual environment in the repository directory
 2. Install pip
 3. Enter the excited_hydrogen_project/ directory and run:
 ```bash
-    pip install -e .
+pip install -e .
 ```
 Install the package in *editable* mode
 
