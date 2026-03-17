@@ -25,7 +25,7 @@ def cart_to_sph(x: Array, y: Array, z: Array) -> Tuple[Array, Array, Array]:
     phi = np.arctan2(y, x)
     return r, theta, phi
 
-
+# 2D projection
 @dataclass(frozen=True)
 class SliceGrid:
     """
@@ -63,7 +63,6 @@ class SliceGrid:
             Z = np.full_like(X, self.fixed_value)
             return X, Y, Z, A, B
         raise ValueError(f"Unknown plane: {self.plane}")
-
 
 class GridProjector:
     """
@@ -139,3 +138,138 @@ class GridProjector:
         Convenience: difference of densities (useful for debugging relaxation effects).
         """
         return self.density_from_rho(rho_a) - self.density_from_rho(rho_b)
+
+# 3D projection
+@dataclass(frozen=True)
+class VolumeGrid:
+    """
+    Uniform 3D Cartesian grid.
+
+    extent:
+        half-width of the cube in atomic units
+        x,y,z in [-extent, extent]
+    n:
+        number of points per axis
+    """
+    extent: float = 40.0
+    n: int = 64
+
+    def mesh(self) -> Tuple[Array, Array, Array]:
+        a = np.linspace(-self.extent, self.extent, self.n)
+        X, Y, Z = np.meshgrid(a, a, a, indexing="ij")
+        return X, Y, Z
+
+class GridProjector3D:
+    """
+    Precompute psi[p, i] = psi_i(r_p) on a 3D grid.
+
+    Parameters
+    ----------
+    basis
+        Basis object with:
+          - basis.orbitals
+          - basis.N
+    grid
+        VolumeGrid instance
+    psi_dtype
+        dtype used to store cached orbital values.
+        complex64 is often enough for visualization and saves memory.
+    """
+
+    def __init__(
+        self,
+        basis,
+        grid: VolumeGrid,
+        psi_dtype=np.complex64,
+    ):
+        self.basis = basis
+        self.grid = grid
+        self.N = basis.N
+        self.psi_dtype = psi_dtype
+
+        X, Y, Z = grid.mesh()
+        self.X = X
+        self.Y = Y
+        self.Z = Z
+
+        r, theta, phi = cart_to_sph(X, Y, Z)
+        self.r = r
+        self.theta = theta
+        self.phi = phi
+
+        self.grid_shape = X.shape
+        self.P = X.size
+
+        self.psi = self._precompute_psi()
+
+    def _precompute_psi(self) -> Array:
+        """
+        Build psi[p, i] with p the flattened grid index.
+        """
+        psi = np.zeros((self.P, self.N), dtype=self.psi_dtype)
+
+        r = self.r.reshape(-1)
+        th = self.theta.reshape(-1)
+        ph = self.phi.reshape(-1)
+
+        for i, orb in enumerate(self.basis.orbitals):
+            vals = orb.psi_nlm(r, th, ph)
+            psi[:, i] = np.asarray(vals, dtype=self.psi_dtype)
+
+        return psi
+
+    def density_from_rho(self, rho: Array) -> Array:
+        """
+        Compute real-space density from a density matrix.
+
+        Returns
+        -------
+        P : ndarray, shape (nx, ny, nz)
+        """
+        rho = np.asarray(rho, dtype=np.complex128)
+
+        P_flat = np.einsum(
+            "pi,ij,pj->p",
+            self.psi,
+            rho,
+            self.psi.conj(),
+            optimize=True,
+        )
+
+        P = np.real(P_flat).reshape(self.grid_shape)
+
+        # Clip tiny negative numerical noise
+        P[P < 0.0] = 0.0
+        return P
+
+    def density_from_c(self, c: Array) -> Array:
+        """
+        Compute density from pure-state coefficients c.
+        """
+        c = np.asarray(c, dtype=np.complex128)
+
+        psi_total = self.psi @ c
+        P = np.real(psi_total * psi_total.conj()).reshape(self.grid_shape)
+        P[P < 0.0] = 0.0
+        return P
+
+    def density_slice(self, rho: Array, axis: str = "z", index: int | None = None) -> Array:
+        """
+        Convenience helper: extract a central 2D slice from 3D density.
+
+        axis : 'x', 'y', or 'z'
+        index : slice index; if None, uses center
+        """
+        P = self.density_from_rho(rho)
+
+        if index is None:
+            index = self.grid.n // 2
+
+        if axis == "x":
+            return P[index, :, :]
+        if axis == "y":
+            return P[:, index, :]
+        if axis == "z":
+            return P[:, :, index]
+
+        raise ValueError("axis must be 'x', 'y', or 'z'")

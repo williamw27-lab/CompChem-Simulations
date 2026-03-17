@@ -3,7 +3,7 @@
 import numpy as np
 from hydrogen_sim.orbitals import Orbital
 
-def _make_hydrogen_orbitals(nmax):
+def _make_hydrogen_orbitals(nmax: int) -> list[Orbital]:
 
     orbs_list = []
 
@@ -52,5 +52,5 @@ class Basis:
     def select_nl(self, n, l):
         return self.select(lambda o: o.n == n and o.l == l)
 
-def make_hydrogen_basis(nmax):
+def make_hydrogen_basis(nmax: int) -> Basis:
     return Basis(_make_hydrogen_orbitals(nmax))
