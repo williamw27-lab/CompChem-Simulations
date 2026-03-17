@@ -11,12 +11,12 @@ motivated students at Lakeside School in Seattle!
 
 Hydrogen atom simulation in atomic units using a basis-set approach with:
 
-[x] hydrogenic orbitals \((n,\ell,m)\)
-[x] field-free and driven dynamics
-[x] density-matrix evolution with Lindblad relaxation
-[x] dipole coupling in the electric dipole approximation
-[x] 2D visualization 
-[] 3D visualization and animation
+- [x] hydrogenic orbitals \((n,\ell,m)\)
+- [x] field-free and driven dynamics
+- [x] density-matrix evolution with Lindblad relaxation
+- [x] dipole coupling in the electric dipole approximation
+- [x] 2D visualization 
+- [] 3D visualization and animation
 
 ## Project structure
 
@@ -26,7 +26,11 @@ excited_hydrogen_project/
 ├── pyproject.toml
 ├── README.md
 ├── scripts/
+│   ├── old_project.py ==No longer used==
 │   ├── run_rho.py
+│   ├── viz_2d.py
+│   ├── viz_3d.py
+│   ├── animate_3d.py
 │   └── run_tester.py
 ├── src/
 │   └── hydrogen_sim/
@@ -48,42 +52,36 @@ excited_hydrogen_project/
 ## Package Installation
 
 0. Clone the repository, in your terminal:
-    'git clone [text](https://github.com/williamw27-lab/CompChem-Simulations.git)'
+    `git clone [https://github.com/williamw27-lab/CompChem-Simulations.git](https://github.com/williamw27-lab/CompChem-Simulations.git)`
 1. Activate a virtual environment in the repository directory
 2. Install pip
-3. Enter the /excited_hydrogen_project/ directory and run:
-    'pip install -e .' Install in *editable* mode
+3. Enter the excited_hydrogen_project/ directory and run:
+    `pip install -e .` Install in *editable* mode
+
+## Package updates
+
+If dependencies, package structure, or scripts changed, run:
+    `pip install -e .`
 
 ## Running
 
 Run the main density-matrix simulation with:
-    'python scripts/run_rho.py'
+    `python excited_hydrogen_project/scripts/run_rho.py`
 
-After pulling updates
-
-If dependencies, package structure, or scripts changed, run:
-
-pip install -e .
-Outputs
+## Outputs
 
 Simulation outputs are written to runs/ and typically include:
+- compressed array data in .npz
+- run metadata and diagnostics in .json
+- a latest/ directory with the most recent run
 
-compressed array data in .npz
+Typical saved quantities (in .npz) include:
+- stored times
+- populations
+- energy expectation values
+- trace
+- purity
+- rho snapshots
 
-run metadata and diagnostics in .json
+## Dependencies
 
-a latest/ directory with the most recent run
-
-Typical saved quantities include:
-
-stored times
-
-populations
-
-energy expectation values
-
-trace
-
-purity
-
-rho snapshots
