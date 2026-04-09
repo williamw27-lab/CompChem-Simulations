@@ -96,7 +96,7 @@ Typical saved quantities (in .npz) include:
 
 - numpy >= 2.3.5
 - scipy >= 1.17.0
-- plotly >= 6.5.0 *plotly dependency not in package yet*
+- plotly >= 6.5.0
 
 ## Visualization
 
@@ -105,7 +105,7 @@ Run the corresponding script:
 python excited_hydrogen_project/scripts/viz_2d.py # matplotlib snapshots
 ``` 
 ```bash
-python excited_hydrogen_project/scripts/viz_3d.py -h # plotly isosurface snapshots
+python excited_hydrogen_project/scripts/viz_3d.py -h # plotly isosurface snapshots (WIP)
 ```
 ```bash
 python excited_hydrogen_project/scripts/animated_3d.py # plotly isosurface animation (WIP)
